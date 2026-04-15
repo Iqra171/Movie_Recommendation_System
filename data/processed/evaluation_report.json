@@ -1,0 +1,104 @@
+{
+  "generated_at": "2026-04-10T18:03:17.166046",
+  "dataset": "ml-latest-small",
+  "test_frac": 0.15,
+  "warm_threshold": 5,
+  "dataset_statistics": {
+    "n_ratings": 100836,
+    "n_movies": 9742,
+    "n_movies_rated": 9724,
+    "n_users": 610,
+    "n_tags": 3683,
+    "cold_users": 0,
+    "warm_users": 610,
+    "cold_user_pct": 0.0,
+    "rating_scale": "0.5\u20135.0 (half-star)",
+    "sparsity": 0.983,
+    "avg_ratings_per_user": 165.3,
+    "median_ratings_per_user": 70.5,
+    "avg_ratings_per_movie": 10.4,
+    "rating_distribution": {
+      "0.5": 1370,
+      "1.0": 2811,
+      "1.5": 1791,
+      "2.0": 7551,
+      "2.5": 5550,
+      "3.0": 20047,
+      "3.5": 13136,
+      "4.0": 26818,
+      "4.5": 8551,
+      "5.0": 13211
+    }
+  },
+  "accuracy": {
+    "overall": {
+      "rmse": 0.6973,
+      "mae": 0.5394,
+      "n": 2000
+    },
+    "cold_users": {
+      "rmse": 0.0,
+      "mae": 0.0,
+      "n": 0,
+      "note": "users with < 5 training ratings"
+    },
+    "warm_users": {
+      "rmse": 0.6973,
+      "mae": 0.5394,
+      "n": 2000,
+      "note": "users with >= 5 training ratings"
+    }
+  },
+  "ranking": {
+    "@5": {
+      "precision": 0.034,
+      "recall": 0.024,
+      "ndcg": 0.0856,
+      "n_users": 200
+    },
+    "@10": {
+      "precision": 0.032,
+      "recall": 0.0419,
+      "ndcg": 0.1045,
+      "n_users": 200
+    },
+    "@20": {
+      "precision": 0.029,
+      "recall": 0.0737,
+      "ndcg": 0.1362,
+      "n_users": 200
+    }
+  },
+  "coverage": {
+    "catalog_coverage": 0.0213,
+    "user_coverage": 1.0,
+    "gini_coefficient": 0.6478,
+    "unique_items_recommended": 207,
+    "total_items": 9724,
+    "note": "Gini: 0=perfectly equal distribution, 1=single item monopoly"
+  },
+  "cold_start_curve": {
+    "20": {
+      "rmse": 0.7953,
+      "mae": 0.6209,
+      "n_users": 225,
+      "n_samples": 500
+    },
+    "50": {
+      "rmse": 0.7103,
+      "mae": 0.5327,
+      "n_users": 385,
+      "n_samples": 500
+    }
+  },
+  "explainability_audit": {
+    "status": "passed",
+    "total_profiles": 76,
+    "missing_rec_files": 0,
+    "total_recs_audited": 1520,
+    "consistent": 1520,
+    "inconsistent": 0,
+    "consistency_rate": 1.0,
+    "guarantee": "Cold start profiles never use CF-mode explanations"
+  }
+}

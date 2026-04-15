@@ -1,0 +1,29 @@
+# Node
+node_modules/
+.next/
+.vercel/
+out/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.pkl
+*.pickle
+.env
+.env.local
+.env.production
+
+# Data — large files not committed to git
+data/ml-latest-small/
+data/ml-32m/
+
+# public/data is committed (pre-built JSON)
+# Uncomment below if files are too large:
+# public/data/recs_*.json
+
+# OS
+.DS_Store
+Thumbs.db
