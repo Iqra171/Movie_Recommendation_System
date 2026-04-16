@@ -1,12 +1,12 @@
 # Interactive Explainable Recommender System — MovieLens
 
-**HESTIA Lab · Human-in-the-Loop & Explainable AI · MS Computer Science Research Prototype**
+**Human-in-the-Loop & Explainable AI · MS Computer Science Research Prototype**
 
 ---
 
 ## System Description
 
-This is an interactive, explainable movie recommender system built on the MovieLens dataset (Harper & Konstan, 2015) as a research prototype for the HESTIA Lab. The system demonstrates two core concepts in recommender system research: (1) **cold start mitigation** via genre chip selection and mood-tagged movie seeding, and (2) **honest, mode-aware explainability** that switches between content-based and collaborative filtering explanations based on the actual algorithm in use. The backend runs entirely as static JSON served by Next.js on Vercel — the SVD model is trained offline with scikit-surprise and all predictions are pre-computed and serialized, eliminating Python runtime dependencies in production. Users interact through a three-step onboarding wizard, see explanations for every recommendation, and can provide explicit feedback ("Not interested", "More like this") that re-ranks results in real time without a page reload.
+This is an interactive, explainable movie recommender system built on the MovieLens dataset (Harper & Konstan, 2015) as a research prototype for the HESTIA Lab. The system demonstrates two core concepts in recommender system research: (1) **cold start mitigation** via genre chip selection, and (2) **honest, mode-aware explainability** that switches between content-based and collaborative filtering explanations based on the actual algorithm in use. The backend runs entirely as static JSON served by Next.js on Vercel — the SVD model is trained offline with scikit-surprise and all predictions are pre-computed and serialized, eliminating Python runtime dependencies in production. Users interact through a three-step onboarding wizard, see explanations for every recommendation, and can provide explicit feedback ("Not interested", "More like this") that re-ranks results in real time without a page reload.
 
 ---
 
@@ -17,7 +17,7 @@ This is an interactive, explainable movie recommender system built on the MovieL
 | Frontend | Next.js 14 (App Router), React 18, Tailwind CSS |
 | Backend | Next.js API routes (Node.js, no Python runtime) |
 | ML | Python + scikit-surprise SVD, run offline |
-| Dataset | MovieLens ml-latest-small (dev), ml-32m (production) |
+| Dataset | MovieLens ml-latest-small (dev)|
 | Posters | TMDB API v3 (free tier, no credit card) |
 | Deployment | Vercel (free tier) |
 
@@ -33,7 +33,6 @@ Both datasets share the same file structure:
 - `links.csv` — `movieId, imdbId, tmdbId` (used to fetch TMDB posters)
 
 **Development:** [ml-latest-small](https://grouplens.org/datasets/movielens/latest/) — ~100K ratings, ~9K movies, ~600 users  
-**Production:** ml-32m — 32M ratings, 200K users, 87K movies (benchmark scale)
 
 > Harper, F. M., & Konstan, J. A. (2015). The MovieLens datasets: History and context. *ACM Transactions on Interactive Intelligent Systems (TiiS)*, 5(4), 1–19. https://doi.org/10.1145/2827872
 
@@ -46,8 +45,7 @@ User browser
     │
     ├── OnboardingFlow (3-step wizard)
     │       Step 1: Genre chip selection (18 genres)
-    │       Step 2: Mood selection (4 moods, derived from tags.csv)
-    │       Step 3: Rate 6 movies from genre+mood intersection
+    
     │
     ├── RecommendationsView
     │       ├── ColdStartBanner      (shown while real ratings < 5)
