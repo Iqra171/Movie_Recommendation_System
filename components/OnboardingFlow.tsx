@@ -36,7 +36,13 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   }
 
   function handleContinue() {
-    savePrefs({ genres: selected, ratedMovies: [], savedAt: Date.now() });
+    savePrefs({
+  genres: selected,
+  ratedMovies: [],
+  notInterested: [],
+  boostedMovies: [],
+  savedAt: Date.now()
+});
     onComplete(selected);
   }
 

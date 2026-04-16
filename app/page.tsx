@@ -19,7 +19,13 @@ export default function HomePage() {
   }, []);
 
   function handleOnboardingComplete(selectedGenres: string[]) {
-    savePrefs({ genres: selectedGenres, ratedMovies: [], savedAt: Date.now() });
+    savePrefs({
+  genres: selectedGenres,
+  ratedMovies: [],
+  notInterested: [],
+  boostedMovies: [],
+  savedAt: Date.now()
+});
     setGenres(selectedGenres);
   }
 

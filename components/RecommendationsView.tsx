@@ -89,12 +89,18 @@ export default function RecommendationsView({ genres, onReset }: Recommendations
       // Persist real ratings
       const prefs = loadPrefs();
       savePrefs({
-        genres: prefs?.genres ?? genres,
-        ratedMovies: next
-          .filter(r => !r.synthetic)
-          .map(r => ({ movieId: r.movieId, rating: r.rating, timestamp: r.timestamp })),
-        savedAt: Date.now(),
-      });
+  genres: prefs?.genres ?? genres,
+  ratedMovies: next
+    .filter(r => !r.synthetic)
+    .map(r => ({
+      movieId: r.movieId,
+      rating: r.rating,
+      timestamp: r.timestamp
+    })),
+  notInterested: prefs?.notInterested ?? [],
+  boostedMovies: prefs?.boostedMovies ?? [],
+  savedAt: Date.now(),
+});
 
       return next;
     });
@@ -103,7 +109,8 @@ export default function RecommendationsView({ genres, onReset }: Recommendations
   const handleNotInterested = useCallback((movieId: number) => {
   setRecs(prev => applyFeedback(prev, movieId, "not_interested"));
   setExcluded(prev => {
-    const next = new Set([...prev, movieId]);
+    // REPLACE WITH
+const next = new Set(Array.from(prev).concat(movieId));
     // Persist to localStorage
     const prefs = loadPrefs();
     savePrefs({
