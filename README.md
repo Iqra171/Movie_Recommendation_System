@@ -6,7 +6,7 @@
 
 ## System Description
 
-This is an interactive, explainable movie recommender system built on the MovieLens dataset (Harper & Konstan, 2015) as a research prototype for the HESTIA Lab. The system demonstrates two core concepts in recommender system research: (1) **cold start mitigation** via genre chip selection, and (2) **honest, mode-aware explainability** that switches between content-based and collaborative filtering explanations based on the actual algorithm in use. The backend runs entirely as static JSON served by Next.js on Vercel — the SVD model is trained offline with scikit-surprise and all predictions are pre-computed and serialized, eliminating Python runtime dependencies in production. Users interact through a three-step onboarding wizard, see explanations for every recommendation, and can provide explicit feedback ("Not interested", "More like this") that re-ranks results in real time without a page reload.
+This is an interactive, explainable movie recommender system built on the MovieLens dataset (Harper & Konstan, 2015) as a research prototype for the HESTIA Lab. The system demonstrates two core concepts in recommender system research: (1) **cold start mitigation** via genre chip selection, and (2) **honest, mode-aware explainability** that switches between content-based and collaborative filtering explanations based on the actual algorithm in use. The backend runs entirely as static JSON served by Next.js on Vercel — the SVD model is trained offline with scikit-surprise and all predictions are pre-computed and serialized, eliminating Python runtime dependencies in production. Users interact through a two-step onboarding wizard, see explanations for every recommendation, and can provide explicit feedback ("Not interested", "More like this") that re-ranks results in real time without a page reload.
 
 ---
 
@@ -17,7 +17,7 @@ This is an interactive, explainable movie recommender system built on the MovieL
 | Frontend | Next.js 14 (App Router), React 18, Tailwind CSS |
 | Backend | Next.js API routes (Node.js, no Python runtime) |
 | ML | Python + scikit-surprise SVD, run offline |
-| Dataset | MovieLens ml-latest-small (dev)|
+| Dataset | MovieLens ml-latest-small (dev) |
 | Posters | TMDB API v3 (free tier, no credit card) |
 | Deployment | Vercel (free tier) |
 
@@ -32,7 +32,7 @@ Both datasets share the same file structure:
 - `tags.csv` — `userId, movieId, tag (free-text), timestamp`
 - `links.csv` — `movieId, imdbId, tmdbId` (used to fetch TMDB posters)
 
-**Development:** [ml-latest-small](https://grouplens.org/datasets/movielens/latest/) — ~100K ratings, ~9K movies, ~600 users  
+**Development:** [ml-latest-small](https://grouplens.org/datasets/movielens/latest/) — ~100K ratings, ~9K movies, ~600 users
 
 > Harper, F. M., & Konstan, J. A. (2015). The MovieLens datasets: History and context. *ACM Transactions on Interactive Intelligent Systems (TiiS)*, 5(4), 1–19. https://doi.org/10.1145/2827872
 
@@ -43,19 +43,18 @@ Both datasets share the same file structure:
 ```
 User browser
     │
-    ├── OnboardingFlow (3-step wizard)
+    ├── OnboardingFlow (2-step wizard)
     │       Step 1: Genre chip selection (18 genres)
-    
+    │       Step 2: Recommendations
     │
     ├── RecommendationsView
-    │       ├── ColdStartBanner      (shown while real ratings < 5)
     │       ├── RecommendationCard × 10
     │       │     ├── TMDB poster
     │       │     ├── Predicted rating
     │       │     ├── ExplanationPanel (cold/CF, mode-honest)
     │       │     │     └── NeighborBar visualization
     │       │     └── Feedback buttons (Not interested / More like this)
-    │       └── TasteProfile sidebar (live genre breakdown, avg rating)
+    │       └── TasteProfile sidebar (live genre breakdown)
     │
     └── Next.js API routes
             ├── /api/recommend  → reads recs_{hash}.json from /public/data/
@@ -77,12 +76,11 @@ The cold start problem — providing useful recommendations to new users with no
 
 This system addresses cold start with a **synthetic profile seeding** approach:
 
-1. The user selects genre preferences (Step 1) and a mood (Step 2). The mood maps to real user-generated tags from `tags.csv` — not hardcoded genre associations.
-2. A synthetic rating profile is constructed by assigning `rating = 4.0` to the top-ranked movies from the genre×mood intersection, ranked by community average rating.
-3. The synthetic profile is fed into the pre-computed SVD predictions to generate initial recommendations.
-4. As the user rates real movies, real ratings **override** synthetic ones. Once 5 real ratings are collected, the system drops all synthetic ratings and switches to full collaborative filtering.
+1. The user selects genre preferences (Step 1). A synthetic rating profile is constructed by assigning `rating = 4.0` to the top-ranked movies from the genre intersection, ranked by community average rating.
+2. The synthetic profile is fed into the pre-computed SVD predictions to generate initial recommendations.
 
-The transition is **visually explicit** — a banner confirms the mode switch and the explanation text changes from "Recommended because you selected [Genre]…" to "~N users with similar taste rated this [avg rating]★…"
+
+The transition is **visually explicit** — the explanation text changes from "Recommended because you selected [Genre]…" to "~N users with similar taste rated this [avg rating]★…"
 
 This is academically grounded: it avoids the hallucinated preference injection described in LLM Data Augmenters (Mysore et al., 2023) while still providing meaningful cold-start recommendations from real tag and rating data.
 
@@ -92,13 +90,12 @@ This is academically grounded: it avoids the hallucinated preference injection d
 
 The system provides two types of explanations, and **never mixes them dishonestly**:
 
-**Cold start mode** (`< 5 real ratings`):
+**Cold start mode** (`< 5 feedback interactions`):
 ```
-Recommended because you selected Action, Sci-Fi and chose "Edge of my seat" mood.
-(Collaborative filtering will activate after 5 ratings.)
+Recommended because you selected Action, Sci-Fi and matches your taste profile.
 ```
 
-**Warm/CF mode** (`≥ 5 real ratings`):
+**Warm/CF mode** (`≥ 5 feedback interactions`):
 ```
 ~24 users with similar taste rated this movie (avg 4.1★).
 They also liked The Dark Knight and Inception.
@@ -127,7 +124,7 @@ movielens-recommender/
 │       ├── tag_mood_map.json
 │       ├── neighbor_data.json
 │       ├── profiles_manifest.json
-│       └── recs_{hash}.json     (one per genre×mood seed profile)
+│       └── recs_{hash}.json     (one per genre seed profile)
 ├── app/
 │   ├── layout.tsx
 │   ├── page.tsx                 Root page (onboarding ↔ recommendations)
@@ -136,14 +133,12 @@ movielens-recommender/
 │       ├── recommend/route.ts   POST: returns pre-computed recs for profile
 │       └── movies/route.ts      GET: serves movie catalog with filters
 ├── components/
-│   ├── OnboardingFlow.tsx       3-step cold start wizard
+│   ├── OnboardingFlow.tsx       2-step cold start wizard
 │   ├── RecommendationCard.tsx   Movie card with poster, rating, explanation
 │   ├── ExplanationPanel.tsx     Mode-aware explanation + neighbor bar
 │   ├── TasteProfile.tsx         Live taste profile sidebar
-│   ├── ColdStartBanner.tsx      Teal cold-start mode indicator
 │   ├── RecommendationsView.tsx  Main recommendations page with state
-│   ├── StarRating.tsx           Interactive star rating widget
-│   └── AboutSection.tsx        Collapsible research description
+│   └── AboutSection.tsx         Collapsible research description
 ├── lib/
 │   ├── types.ts                 Shared TypeScript interfaces
 │   ├── recommender.ts           Client-side rec engine + scoring logic
@@ -249,8 +244,8 @@ None required for the app itself. The TMDB API key is only used during the offli
 
 ## Extending the System
 
-- **Add user accounts:** Replace localStorage with a database (e.g., Vercel KV or PlanetScale) to persist ratings across sessions.
-- **Online model updates:** Add a `/api/feedback` route that logs ratings to a database and triggers periodic model retraining.
+- **Add user accounts:** Replace localStorage with a database (e.g., Vercel KV or PlanetScale) to persist feedback across sessions.
+- **Online model updates:** Add a `/api/feedback` route that logs interactions to a database and triggers periodic model retraining.
 - **LLM explanations:** Connect to Claude or GPT-4 to generate natural-language explanations per movie, grounded in the SVD neighbor data.
 - **A/B testing explainability:** Randomly assign users to explanation types (none / cold / CF / LLM) and measure engagement — a natural HESTIA Lab experiment.
 
@@ -260,6 +255,4 @@ None required for the app itself. The TMDB API key is only used during the offli
 
 1. Harper, F. M., & Konstan, J. A. (2015). The MovieLens datasets: History and context. *ACM Transactions on Interactive Intelligent Systems (TiiS)*, 5(4), 1–19.
 2. Kim, J., et al. (2024). A-LLMRec: Large language models meet collaborative filtering: An efficient all-round LLM-based recommender system. *arXiv:2404.11343*.
-3. Mysore, S., et al. (2023). LLM data augmenters for long-tail knowledge in recommender systems. *arXiv:2309.16500*.
-4. Funk, S. (2006). Netflix Update: Try This at Home. https://sifter.org/~simon/journal/20061211.html
-5. Ricci, F., Rokach, L., & Shapira, B. (2022). *Recommender Systems Handbook* (3rd ed.). Springer.
+
