@@ -37,15 +37,15 @@ export default function AboutSection() {
 
           <div className="grid gap-3 sm:grid-cols-2">
             <InfoCard
-              icon="❄️"
-              title="Cold start strategy"
-              body="When a new user has fewer than 5 ratings, the system builds a synthetic rating profile by seeding genre preferences and mood tags derived from real MovieLens tags.csv data. Pre-computed SVD predictions for representative genre/mood seed profiles are served as static JSON — no Python runtime on Vercel. This approach is grounded in the cold-start gap identified in Kim et al. (2024, A-LLMRec) and LLM Data Augmenters work."
-            />
-            <InfoCard
-              icon="🔗"
-              title="Collaborative filtering"
-              body="Once 5 real ratings are collected, the system transitions to SVD-based collaborative filtering (Funk 2006, popularised by Netflix Prize). The SVD model is trained offline with scikit-surprise on ml-latest-small (dev) or ml-32m (production) and serialised as a pickle file. Predictions are pre-computed for seed profiles and exported to /public/data/."
-            />
+            icon="❄️"
+            title="Cold start strategy"
+            body="When a new user has not yet interacted with any movies, the system builds a synthetic profile by seeding genre preferences derived from real MovieLens data. SVD-based predictions pre-computed offline with scikit-surprise (Funk, 2006) are served as static JSON — no Python runtime on Vercel. This approach is grounded in the cold-start gap identified in Kim et al. (2024, A-LLMRec)."
+          />
+          <InfoCard
+            icon="🔗" 
+            title="Collaborative filtering"
+            body="Once you interact with 5 movies using 'More like this', the system switches to content-based collaborative scoring — weighting recommendations by genre overlap with movies you have responded to. Predictions are computed client-side in real time, no server call required."
+          />
             <InfoCard
               icon="🔍"
               title="Honest explainability"
