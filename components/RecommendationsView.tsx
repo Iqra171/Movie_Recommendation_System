@@ -15,9 +15,10 @@ import {
 import { loadPrefs, savePrefs } from "@/lib/prefs";
 import RecommendationCard from "./RecommendationCard";
 import TasteProfilePanel from "./TasteProfile";
-// import ColdStartBanner from "./ColdStartBanner";
+import ColdStartBanner from "./ColdStartBanner";
 import MovieSearch from "./MovieSearch";
 import AboutSection from "./AboutSection";
+
 
 interface RecommendationsViewProps {
   genres:   string[];
@@ -28,6 +29,8 @@ export default function RecommendationsView({ genres, onReset }: Recommendations
   const [recs, setRecs]           = useState<Recommendation[]>([]);
   const [allRatings, setAllRatings] = useState<UserRating[]>([]);
   const [allMovies, setAllMovies]   = useState<Movie[]>([]);
+  const [feedbackCount, setFeedbackCount] = useState(0);
+
   const [excluded, setExcluded]     = useState<Set<number>>(new Set());
   const [profile, setProfile]       = useState<TasteProfile>({
     topGenres: [], avgRating: 0, ratingBias: "average",
@@ -36,8 +39,8 @@ export default function RecommendationsView({ genres, onReset }: Recommendations
   const [loading, setLoading]     = useState(true);
   const [sidebarOpen, setSidebar] = useState(false);
 
-  const realRatings = allRatings.filter(r => !r.synthetic);
-  const mode        = realRatings.length >= WARM_THRESHOLD ? "warm" : "cold";
+  const mode = feedbackCount >= WARM_THRESHOLD ? "warm" : "cold";
+
 
   // Init: load movies, restore saved ratings, build synthetic profile
   useEffect(() => {
@@ -124,6 +127,7 @@ const next = new Set(Array.from(prev).concat(movieId));
 
   const handleMoreLikeThis = useCallback(async (movieId: number) => {
   setRecs(prev => {
+    setFeedbackCount(prev => prev + 1);
     const reranked = applyFeedback(prev, movieId, "more_like_this");
     return reranked;
   });
@@ -194,14 +198,15 @@ const next = new Set(Array.from(prev).concat(movieId));
               <div>
                 <p className="font-medium text-blue-300">Collaborative filtering active</p>
                 <p className="text-blue-400/70">
-                  Now using SVD-based CF based on your {realRatings.length} real ratings.
+                 Now using collaborative filtering based on your {feedbackCount} interactions.
                 </p>
               </div>
             </div>
           </div>
         )}
 
-        {/* <ColdStartBanner realRatingCount={realRatings.length} /> */}
+        <ColdStartBanner realRatingCount={feedbackCount} />
+
 
         {/* Genre preference chips */}
         <div className="mb-4 flex flex-wrap items-center gap-2">
