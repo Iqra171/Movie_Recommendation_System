@@ -1,12 +1,12 @@
 # Interactive Explainable Recommender System — MovieLens
 
-**Human-in-the-Loop & Explainable AI · MS Computer Science Research Prototype**
+**Human-in-the-Loop & Explainable AI **
 
 ---
 
 ## System Description
 
-This is an interactive, explainable movie recommender system built on the MovieLens dataset (Harper & Konstan, 2015) as a research prototype for the HESTIA Lab. The system demonstrates two core concepts in recommender system research: (1) **cold start mitigation** via genre chip selection, and (2) **honest, mode-aware explainability** that switches between content-based and collaborative filtering explanations based on the actual algorithm in use. The backend runs entirely as static JSON served by Next.js on Vercel — the SVD model is trained offline with scikit-surprise and all predictions are pre-computed and serialized, eliminating Python runtime dependencies in production. Users interact through a two-step onboarding wizard, see explanations for every recommendation, and can provide explicit feedback ("Not interested", "More like this") that re-ranks results in real time without a page reload.
+This is an interactive, explainable movie recommender system built on the MovieLens dataset (Harper & Konstan, 2015) as a research prototype. The system demonstrates two core concepts in recommender system research: (1) **cold start mitigation** via genre chip selection, and (2) **honest, mode-aware explainability** that switches between content-based and collaborative filtering explanations based on the actual algorithm in use. The backend runs entirely as static JSON served by Next.js on Vercel — the SVD model is trained offline with scikit-surprise and all predictions are pre-computed and serialized, eliminating Python runtime dependencies in production. Users interact through a two-step onboarding wizard, see explanations for every recommendation, and can provide explicit feedback ("Not interested", "More like this") that re-ranks results in real time without a page reload.
 
 ---
 
